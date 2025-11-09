@@ -1,32 +1,16 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useAppStore } from './store';
-import { AuthEnhanced as Auth } from './pages/AuthEnhanced';
-import { AssessmentEnhanced as Assessment } from './pages/AssessmentEnhanced';
-import { DashboardEnhanced as Dashboard } from './pages/DashboardEnhanced';
-import { LessonEnhanced as Lesson } from './pages/LessonEnhanced';
-import { Stats } from './pages/Stats';
-import './index.css';
-
 function App() {
-  const { isAuthenticated } = useAppStore();
-
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={isAuthenticated ? <Navigate to="/dashboard" /> : <Auth />} />
-        {isAuthenticated && (
-          <>
-            <Route path="/assessment" element={<Assessment />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/stats" element={<Stats />} />
-            <Route path="/course/:courseId" element={<Dashboard />} />
-            <Route path="/lesson/:courseId/:lessonId" element={<Lesson />} />
-          </>
-        )}
-        <Route path="*" element={<Navigate to={isAuthenticated ? "/dashboard" : "/"} />} />
-      </Routes>
-    </Router>
-  );
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-100 flex items-center justify-center">
+      <div className="text-center">
+        <h1 className="text-4xl font-bold text-gray-800 mb-4">
+          Future Engineer Project 🚀
+        </h1>
+        <p className="text-lg text-gray-600">
+          تم التثبيت بنجاح! جاهز للبدء.
+        </p>
+      </div>
+    </div>
+  )
 }
 
-export default App;
+export default App
