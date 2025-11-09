@@ -1,4 +1,7 @@
-import DuoOwl from './components/DuoOwl';
+import { lazy, Suspense } from 'react';
+
+// استيراد البومة بشكل متأخر
+const DuoOwl = lazy(() => import('./components/DuoOwl'));
 
 function App() {
   return (
@@ -40,7 +43,9 @@ function App() {
         </div>
       </div>
       
-      <DuoOwl />
+      <Suspense fallback={<div>جاري التحميل...</div>}>
+        <DuoOwl />
+      </Suspense>
     </div>
   )
 }
