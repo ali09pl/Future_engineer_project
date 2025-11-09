@@ -1,8 +1,8 @@
-import RobotMascot from './components/RobotMascot';
+import DuoOwl from './components/DuoOwl';
 
 function App() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-100 flex items-center justify-center p-4">
       <div className="text-center">
         <h1 className="text-4xl font-bold text-gray-800 mb-4">
           Future Engineer Project 🚀
@@ -11,7 +11,7 @@ function App() {
           منصة تعليمية متكاملة للهندسة والذكاء الاصطناعي
         </p>
         <div className="space-x-4 mb-12">
-          <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition duration-200 transform hover:scale-105">
+          <button className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition duration-200 transform hover:scale-105">
             ابدأ التعلم
           </button>
           <button className="bg-white hover:bg-gray-100 text-gray-800 px-6 py-3 rounded-lg font-semibold border border-gray-300 transition duration-200 transform hover:scale-105">
@@ -40,7 +40,7 @@ function App() {
         </div>
       </div>
       
-      <RobotMascot />
+      <DuoOwl />
     </div>
   )
 }
