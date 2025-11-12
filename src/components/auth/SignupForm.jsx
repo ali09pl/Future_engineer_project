@@ -1,119 +1,146 @@
-import { useState } from 'react';
-import { User, Mail, Lock, Eye, EyeOff, UserPlus } from 'lucide-react';
+import React, { useState } from 'react';
+import { AuthService } from '../../services/authService';
 
-export default function SignupForm({ onSwitchToLogin }) {
-  const [showPassword, setShowPassword] = useState(false);
+export default function SignupForm({ onSwitchToLogin, onLogin }) {
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
     password: '',
     confirmPassword: ''
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('إنشاء حساب:', formData);
+    setLoading(true);
+    setError('');
+
+    // التحقق من كلمات المرور
+    if (formData.password !== formData.confirmPassword) {
+      setError('كلمات المرور غير متطابقة');
+      setLoading(false);
+      return;
+    }
+
+    // التحقق من قوة كلمة المرور
+    if (formData.password.length < 6) {
+      setError('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+      setLoading(false);
+      return;
+    }
+
+    const result = await AuthService.register(formData);
+    
+    if (result.success) {
+      onLogin(result.user);
+    } else {
+      setError(result.message);
+    }
+    
+    setLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-100 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">انضم إلينا! 🎉</h1>
-          <p className="text-gray-600">ابدأ رحلتك التعليمية معنا اليوم</p>
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">انضم إلينا! 🎉</h1>
+          <p className="text-gray-600 dark:text-gray-300">إبدأ رحلتك التعليمية معنا اليوم</p>
         </div>
+
+        {error && (
+          <div className="bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg">
+            {error}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 text-right">
               الاسم الكامل
             </label>
-            <div className="relative">
-              <User className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-              <input
-                type="text"
-                required
-                className="w-full pr-3 pl-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right"
-                placeholder="أدخل اسمك الكامل"
-                value={formData.fullName}
-                onChange={(e) => setFormData({...formData, fullName: e.target.value})}
-              />
-            </div>
+            <input
+              type="text"
+              name="fullName"
+              value={formData.fullName}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-right"
+              placeholder="أدخل اسمك الكامل"
+            />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 text-right">
               البريد الإلكتروني
             </label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-              <input
-                type="email"
-                required
-                className="w-full pr-3 pl-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right"
-                placeholder="example@email.com"
-                value={formData.email}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
-              />
-            </div>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-right"
+              placeholder="example@email.com"
+            />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 text-right">
               كلمة المرور
             </label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-              <input
-                type={showPassword ? "text" : "password"}
-                required
-                className="w-full pr-3 pl-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right"
-                placeholder="أنشئ كلمة مرور قوية"
-                value={formData.password}
-                onChange={(e) => setFormData({...formData, password: e.target.value})}
-              />
-              <button
-                type="button"
-                className="absolute left-10 top-3 text-gray-400 hover:text-gray-600"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
-            </div>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-right"
+              placeholder="أنشئ كلمة مرور قوية"
+            />
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 text-right">
+              يجب أن تكون 6 أحرف على الأقل
+            </p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 text-right">
               تأكيد كلمة المرور
             </label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-              <input
-                type={showPassword ? "text" : "password"}
-                required
-                className="w-full pr-3 pl-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right"
-                placeholder="أعد إدخال كلمة المرور"
-                value={formData.confirmPassword}
-                onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
-              />
-            </div>
+            <input
+              type="password"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-right"
+              placeholder="أعد إدخال كلمة المرور"
+            />
           </div>
 
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition duration-200 flex items-center justify-center space-x-2"
+            disabled={loading}
+            className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold transition duration-200 disabled:opacity-50"
           >
-            <UserPlus size={20} />
-            <span>إنشاء حساب</span>
+            {loading ? 'جاري إنشاء الحساب...' : 'إنشاء حساب'}
           </button>
         </form>
 
-        <div className="mt-6 text-center">
-          <p className="text-gray-600">
+        <div className="text-center">
+          <p className="text-gray-600 dark:text-gray-400">
             لديك حساب بالفعل؟{' '}
             <button
               onClick={onSwitchToLogin}
-              className="text-blue-600 hover:text-blue-700 font-semibold"
+              className="text-green-600 hover:text-green-700 font-semibold"
             >
               سجل الدخول
             </button>

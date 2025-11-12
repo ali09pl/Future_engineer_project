@@ -1,22 +1,61 @@
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* أنيميشن جديدة للبومة */
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
+* {
+  direction: rtl;
+  font-family: 'Tajawal', sans-serif;
 }
 
-.animate-blink {
-  animation: blink 2s ease-in-out infinite;
+/* تخصيص شريط التمرير */
+::-webkit-scrollbar {
+  width: 8px;
 }
 
-.animate-float {
-  animation: float 3s ease-in-out infinite;
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-5px); }
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
+}
+
+/* تأثيرات للوضع الداكن */
+.dark ::-webkit-scrollbar-track {
+  background: #374151;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #6b7280;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* تأثيرات للبطاقات */
+.card-hover {
+  transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* تخصيص إضافي للوضع الداكن */
+.dark {
+  color-scheme: dark;
+}
+
+.dark body {
+  background-color: #111827;
+  color: #f9fafb;
 }

@@ -1,16 +1,45 @@
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import { DatabaseService } from './databaseService.js';
-import { v4 as uuidv4 } from 'uuid';
-
-const JWT_SECRET = 'future-engineer-secret-key';
-
+// نظام مصادقة يعمل مع localStorage
 export class AuthService {
+  // تهيئة المستخدمين إذا لم يكونوا موجودين
+  static initializeUsers() {
+    if (typeof window === 'undefined') return;
+    
+    const existingUsers = localStorage.getItem('future_engineer_users');
+    if (!existingUsers) {
+      const defaultUsers = [
+        {
+          id: 1,
+          fullName: 'مستخدم تجريبي',
+          email: 'test@example.com',
+          password: '123456',
+          level: 2,
+          points: 150,
+          streakDays: 5
+        }
+      ];
+      localStorage.setItem('future_engineer_users', JSON.stringify(defaultUsers));
+    }
+  }
+
+  // جلب جميع المستخدمين
+  static getUsers() {
+    if (typeof window === 'undefined') return [];
+    const users = localStorage.getItem('future_engineer_users');
+    return users ? JSON.parse(users) : [];
+  }
+
+  // حفظ المستخدمين
+  static saveUsers(users) {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem('future_engineer_users', JSON.stringify(users));
+  }
+
   // تسجيل مستخدم جديد
   static async register(userData) {
     try {
+      this.initializeUsers();
       const { fullName, email, password } = userData;
-      const users = DatabaseService.getUsers();
+      const users = this.getUsers();
 
       // التحقق من وجود المستخدم
       const existingUser = users.find(user => user.email === email);
@@ -18,15 +47,12 @@ export class AuthService {
         return { success: false, message: 'البريد الإلكتروني مستخدم بالفعل' };
       }
 
-      // تشفير كلمة المرور
-      const hashedPassword = bcrypt.hashSync(password, 10);
-      
       // إنشاء مستخدم جديد
       const newUser = {
-        id: uuidv4(),
+        id: Date.now(),
         fullName,
         email,
-        password: hashedPassword,
+        password,
         level: 1,
         points: 0,
         streakDays: 0,
@@ -34,15 +60,14 @@ export class AuthService {
       };
 
       users.push(newUser);
-      DatabaseService.saveUsers(users);
+      this.saveUsers(users);
 
-      // إنشاء توكن
-      const token = jwt.sign({ userId: newUser.id }, JWT_SECRET);
-      
+      // حفظ المستخدم الحالي في الجلسة
+      localStorage.setItem('current_user', JSON.stringify(newUser));
+
       return {
         success: true,
         message: 'تم إنشاء الحساب بنجاح',
-        token,
         user: {
           id: newUser.id,
           fullName: newUser.fullName,
@@ -53,6 +78,7 @@ export class AuthService {
         }
       };
     } catch (error) {
+      console.error('Register error:', error);
       return { success: false, message: 'حدث خطأ أثناء إنشاء الحساب' };
     }
   }
@@ -60,24 +86,20 @@ export class AuthService {
   // تسجيل الدخول
   static async login(email, password) {
     try {
-      const users = DatabaseService.getUsers();
-      const user = users.find(u => u.email === email);
+      this.initializeUsers();
+      const users = this.getUsers();
+      const user = users.find(u => u.email === email && u.password === password);
 
       if (!user) {
         return { success: false, message: 'البريد الإلكتروني أو كلمة المرور غير صحيحة' };
       }
 
-      if (!bcrypt.compareSync(password, user.password)) {
-        return { success: false, message: 'البريد الإلكتروني أو كلمة المرور غير صحيحة' };
-      }
-
-      // إنشاء توكن
-      const token = jwt.sign({ userId: user.id }, JWT_SECRET);
+      // حفظ المستخدم الحالي في الجلسة
+      localStorage.setItem('current_user', JSON.stringify(user));
 
       return {
         success: true,
         message: 'تم تسجيل الدخول بنجاح',
-        token,
         user: {
           id: user.id,
           fullName: user.fullName,
@@ -88,22 +110,26 @@ export class AuthService {
         }
       };
     } catch (error) {
+      console.error('Login error:', error);
       return { success: false, message: 'حدث خطأ أثناء تسجيل الدخول' };
     }
   }
 
-  // التحقق من التوكن
-  static verifyToken(token) {
-    try {
-      return jwt.verify(token, JWT_SECRET);
-    } catch (error) {
-      return null;
-    }
+  // جلب المستخدم الحالي
+  static getCurrentUser() {
+    if (typeof window === 'undefined') return null;
+    const user = localStorage.getItem('current_user');
+    return user ? JSON.parse(user) : null;
   }
 
-  // جلب بيانات المستخدم
-  static getUserById(userId) {
-    const users = DatabaseService.getUsers();
-    return users.find(user => user.id === userId);
+  // تسجيل الخروج
+  static logout() {
+    if (typeof window === 'undefined') return;
+    localStorage.removeItem('current_user');
   }
+}
+
+// تهيئة المستخدمين عند تحميل الملف
+if (typeof window !== 'undefined') {
+  AuthService.initializeUsers();
 }

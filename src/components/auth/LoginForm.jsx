@@ -1,86 +1,113 @@
-import { useState } from 'react';
-import { Mail, Lock, Eye, EyeOff, LogIn } from 'lucide-react';
+import React, { useState } from 'react';
+import { AuthService } from '../../services/authService';
+import { TranslationService } from '../../services/translationService';
 
-export default function LoginForm({ onSwitchToSignup }) {
-  const [showPassword, setShowPassword] = useState(false);
+export default function LoginForm({ onSwitchToSignup, onLogin }) {
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('تسجيل الدخول:', formData);
+    setLoading(true);
+    setError('');
+
+    const result = await AuthService.login(formData.email, formData.password);
+    
+    if (result.success) {
+      onLogin(result.user);
+    } else {
+      setError(result.message);
+    }
+    
+    setLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-100 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">مرحباً بعودتك! 👋</h1>
-          <p className="text-gray-600">سجل الدخول لمتابعة رحلتك التعليمية</p>
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">
+            {TranslationService.t('welcomeBack')} 👋
+          </h1>
+          <p className="text-gray-600 dark:text-gray-300">
+            {TranslationService.t('continueJourney')}
+          </p>
         </div>
+
+        {error && (
+          <div className="bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg">
+            {error}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
-              البريد الإلكتروني
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 text-right">
+              {TranslationService.t('email')}
             </label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-              <input
-                type="email"
-                required
-                className="w-full pr-3 pl-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-right"
-                placeholder="example@email.com"
-                value={formData.email}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
-              />
-            </div>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-right"
+              placeholder="example@email.com"
+            />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2 text-right">
-              كلمة المرور
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 text-right">
+              {TranslationService.t('password')}
             </label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-              <input
-                type={showPassword ? "text" : "password"}
-                required
-                className="w-full pr-3 pl-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-right"
-                placeholder="أدخل كلمة المرور"
-                value={formData.password}
-                onChange={(e) => setFormData({...formData, password: e.target.value})}
-              />
-              <button
-                type="button"
-                className="absolute left-10 top-3 text-gray-400 hover:text-gray-600"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
-            </div>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-right"
+              placeholder="••••••••"
+            />
           </div>
 
           <button
             type="submit"
-            className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold transition duration-200 flex items-center justify-center space-x-2"
+            disabled={loading}
+            className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold transition duration-200 disabled:opacity-50"
           >
-            <LogIn size={20} />
-            <span>تسجيل الدخول</span>
+            {loading ? 'جاري تسجيل الدخول...' : TranslationService.t('login')}
           </button>
         </form>
 
-        <div className="mt-6 text-center">
-          <p className="text-gray-600">
-            ليس لديك حساب؟{' '}
+        <div className="text-center">
+          <p className="text-gray-600 dark:text-gray-400">
+            {TranslationService.t('noAccount')}{' '}
             <button
               onClick={onSwitchToSignup}
               className="text-green-600 hover:text-green-700 font-semibold"
             >
-              أنشئ حساباً جديداً
+              {TranslationService.t('signup')}
             </button>
+          </p>
+        </div>
+
+        {/* Test account hint */}
+        <div className="mt-8 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+          <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
+            <strong>حساب تجريبي / Test Account:</strong><br />
+            test@example.com / 123456
           </p>
         </div>
       </div>
