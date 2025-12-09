@@ -1,25 +1,26 @@
 {
-  "name": "future-engineer-project",
-  "type": "module",
+  "name": "future-engineer-platform",
   "version": "1.0.0",
+  "private": true,
   "scripts": {
-    "dev": "vite --host",
-    "build": "vite build",
-    "preview": "vite preview"
+    "dev": "NEXT_DISABLE_SWC=true next dev",
+    "build": "NEXT_DISABLE_SWC=true next build",
+    "start": "next start",
+    "lint": "next lint"
   },
   "dependencies": {
-    "lucide-react": "^0.553.0",
+    "axios": "^1.6.0",
+    "framer-motion": "^10.16.4",
+    "lucide-react": "^0.309.0",
+    "next": "13.4.19",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-helmet-async": "^2.0.5",
-    "react-router-dom": "^7.10.1"
+    "react-icons": "^4.12.0",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
-    "@types/bcryptjs": "^2.4.6",
-    "@vitejs/plugin-react": "^4.0.0",
-    "autoprefixer": "^10.4.0",
-    "postcss": "^8.4.0",
-    "tailwindcss": "^3.3.0",
-    "vite": "^4.0.0"
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.31",
+    "tailwindcss": "^3.3.5"
   }
 }
